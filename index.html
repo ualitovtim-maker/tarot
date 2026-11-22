@@ -44,7 +44,7 @@
       z-index: 0;
       background-color: #0b0205;
       background-image:
-        radial-gradient(ellipse at 50% 24%, rgba(88, 14, 26, 0.25) 0%, rgba(9, 2, 4, 0.78) 76%),
+        radial-gradient(ellipse at 50% 24%, rgba(88, 14, 26, 0.22) 0%, rgba(9, 2, 4, 0.72) 78%),
         url('Фон.png');
       background-size: cover;
       background-position: center bottom;
@@ -203,32 +203,32 @@
       }
 
       // =====================================================================
-      // 2. ПОЛНЫЙ СПИСОК ВСЕХ 78 КАРТ ТАРО (ИМЕНА ФАЙЛОВ БЕЗ .png)
+      // 2. ПОЛНЫЙ СПИСОК 78 КАРТ ТАРО (ЧИСТЫЕ НАЗВАНИЯ БЕЗ НОМЕРОВ АРКАНОВ)
       // =====================================================================
       const TAROT_CARDS = [
         // Старшие арканы (22)
-        '0-22 аркан - Дурак',
-        '1 аркан - Маг',
-        '2 аркан - Жрица',
-        '3 аркан - Императрица',
-        '4 аркан - Император',
-        '5 аркан - Жрец',
-        '6 аркан - Влюбленные',
-        '7 аркан - Колесница',
-        '8 аркан - Сила',
-        '9 аркан - Отшельник',
-        '10 аркан - Колесо фортуны',
-        '11 аркан - Справедливость',
-        '12 аркан - Повешенный',
-        '13 аркан - Смерть',
-        '14 аркан - Умеренность',
-        '15 аркан - Дьявол',
-        '16 аркан - Башня',
-        '17 аркан - Звезда',
-        '18 аркан - Луна',
-        '19 аркан - Солнце',
-        '20 аркан - Страшный суд',
-        '21 аркан - Мир',
+        'Дурак',
+        'Маг',
+        'Жрица',
+        'Императрица',
+        'Император',
+        'Жрец',
+        'Влюбленные',
+        'Колесница',
+        'Сила',
+        'Отшельник',
+        'Колесо фортуны',
+        'Справедливость',
+        'Повешенный',
+        'Смерть',
+        'Умеренность',
+        'Дьявол',
+        'Башня',
+        'Звезда',
+        'Луна',
+        'Солнце',
+        'Страшный суд',
+        'Мир',
         // Мечи (14)
         'Туз мечей', 'Двойка мечей', 'Тройка мечей', 'Четверка мечей',
         'Пятерка мечей', 'Шестерка мечей', 'Семерка мечей', 'Восьмерка мечей',
@@ -254,7 +254,7 @@
       const CARD_BACK_FILE = 'Обратная сторона.png';
 
       // =====================================================================
-      // 3. THREE.JS СЦЕНА, КАМЕРА (ПОЛОГИЙ РАКУРС ПОД ФОН.png) И ОСВЕЩЕНИЕ
+      // 3. THREE.JS СЦЕНА, КАМЕРА И МЯГКОЕ МАТОВОЕ ОСВЕЩЕНИЕ БЕЗ БЛИКОВ
       // =====================================================================
       const canvas = document.getElementById('webgl-canvas');
       const renderer = new THREE.WebGLRenderer({
@@ -267,13 +267,12 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.06;
+      renderer.toneMappingExposure = 1.04;
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
       const scene = new THREE.Scene();
 
-      // Узкий FOV (34°) убирает перспективное растягивание карт по краям экрана
       const camera = new THREE.PerspectiveCamera(34, window.innerWidth / window.innerHeight, 0.1, 60);
 
       function updateCameraForViewport() {
@@ -282,7 +281,6 @@
         const aspect = w / h;
         camera.aspect = aspect;
 
-        // Пологий угол, чтобы 3D-стол точно перекрывал стол на Фон.png (~нижние 31% экрана)
         if (aspect < 0.72) {
           camera.fov = 34;
           camera.position.set(0, 2.08, 7.55);
@@ -298,23 +296,27 @@
       updateCameraForViewport();
       window.addEventListener('resize', updateCameraForViewport);
 
-      // Мягкий полумрак + две живые свечи слева и справа
-      scene.add(new THREE.AmbientLight(0x3f1620, 0.92));
-      scene.add(new THREE.HemisphereLight(0x6e2434, 0x120306, 0.72));
+      // Равномерный мягкий свет (без пересветов и зеркальных бликов на картах)
+      const baseAmbientIntensity = 1.18;
+      const ambientLight = new THREE.AmbientLight(0x52212c, baseAmbientIntensity);
+      scene.add(ambientLight);
 
-      const leftCandleLight = new THREE.PointLight(0xff9b48, 4.1, 14, 1.55);
-      leftCandleLight.position.set(-2.95, 1.75, -0.55);
+      const hemiLight = new THREE.HemisphereLight(0x883546, 0x1b050a, 0.85);
+      scene.add(hemiLight);
+
+      const leftCandleLight = new THREE.PointLight(0xffa458, 3.8, 15, 1.45);
+      leftCandleLight.position.set(-2.95, 1.78, -0.45);
       leftCandleLight.castShadow = true;
       leftCandleLight.shadow.mapSize.set(1024, 1024);
       leftCandleLight.shadow.bias = -0.0005;
       scene.add(leftCandleLight);
 
-      const rightCandleLight = new THREE.PointLight(0xff8e3c, 3.4, 13, 1.6);
-      rightCandleLight.position.set(3.05, 1.28, -0.3);
+      const rightCandleLight = new THREE.PointLight(0xff984a, 3.2, 14, 1.5);
+      rightCandleLight.position.set(3.05, 1.32, -0.25);
       scene.add(rightCandleLight);
 
-      const moonRimLight = new THREE.DirectionalLight(0xdec0a4, 0.62);
-      moonRimLight.position.set(-0.4, 5.2, -2.5);
+      const moonRimLight = new THREE.DirectionalLight(0xe4c6aa, 0.52);
+      moonRimLight.position.set(-0.4, 5.2, -2.4);
       moonRimLight.castShadow = true;
       moonRimLight.shadow.mapSize.set(1024, 1024);
       moonRimLight.shadow.camera.near = 1;
@@ -326,13 +328,13 @@
       moonRimLight.shadow.bias = -0.0006;
       scene.add(moonRimLight);
 
-      // Фронтальный тёплый свет для чёткого показа лицевой стороны карт перед камерой
-      const revealSpot = new THREE.DirectionalLight(0xfff0dd, 0.0);
-      revealSpot.position.set(0, 2.5, 8.5);
-      scene.add(revealSpot);
+      // Очень деликатная фронтальная подсветка для читаемости матовых карт при показе
+      const revealFillLight = new THREE.DirectionalLight(0xfff4e6, 0.0);
+      revealFillLight.position.set(0, 2.2, 8.2);
+      scene.add(revealFillLight);
 
       // =====================================================================
-      // 4. ПРОЦЕДУРНАЯ ТЕКСТУРА БАРХАТНОЙ СКАТЕРТИ (ТОЧНО В СТИЛЕ ФОН.png)
+      // 4. ПРОЦЕДУРНАЯ ТЕКСТУРА БАРХАТНОЙ СКАТЕРТИ (ОСВЕТЛЁННЫЕ КРАЯ)
       // =====================================================================
       function createVelvetTableTextures() {
         const size = 1024;
@@ -349,25 +351,26 @@
         const cx = size / 2;
         const cy = size / 2;
 
+        // Осветлённый к краям бордовый бархат (без провала в чёрный)
         const baseGrad = ctx.createRadialGradient(cx, cy * 0.96, size * 0.05, cx, cy, size * 0.52);
-        baseGrad.addColorStop(0.0, '#620b18');
-        baseGrad.addColorStop(0.46, '#450711');
-        baseGrad.addColorStop(0.78, '#260308');
-        baseGrad.addColorStop(1.0, '#110104');
+        baseGrad.addColorStop(0.0, '#6a0e1d');
+        baseGrad.addColorStop(0.48, '#530b17');
+        baseGrad.addColorStop(0.80, '#3c0711');
+        baseGrad.addColorStop(1.0, '#2b050c');
         ctx.fillStyle = baseGrad;
         ctx.fillRect(0, 0, size, size);
 
         bctx.fillStyle = '#707070';
         bctx.fillRect(0, 0, size, size);
 
-        // Мятый бархат
+        // Текстура мятого бархата
         for (let i = 0; i < 420; i++) {
           const x = Math.random() * size;
           const y = Math.random() * size;
           const r = 18 + Math.random() * 72;
-          const bright = Math.random() > 0.45;
+          const bright = Math.random() > 0.42;
           const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-          g.addColorStop(0, bright ? 'rgba(130, 18, 34, 0.085)' : 'rgba(10, 0, 2, 0.11)');
+          g.addColorStop(0, bright ? 'rgba(148, 24, 42, 0.09)' : 'rgba(16, 2, 5, 0.09)');
           g.addColorStop(1, 'rgba(0,0,0,0)');
           ctx.fillStyle = g;
           ctx.beginPath();
@@ -383,10 +386,10 @@
           bctx.fill();
         }
 
-        for (let i = 0; i < 8500; i++) {
+        for (let i = 0; i < 8000; i++) {
           const x = Math.random() * size;
           const y = Math.random() * size;
-          ctx.fillStyle = Math.random() > 0.5 ? 'rgba(165, 45, 58, 0.05)' : 'rgba(0, 0, 0, 0.085)';
+          ctx.fillStyle = Math.random() > 0.48 ? 'rgba(175, 52, 66, 0.055)' : 'rgba(0, 0, 0, 0.07)';
           ctx.fillRect(x, y, 2, 2);
         }
 
@@ -416,18 +419,17 @@
           targetCtx.beginPath();
           targetCtx.arc(0, 0, radius, 0, Math.PI * 2);
           targetCtx.fill();
-          targetCtx.fillStyle = '#31040b';
+          targetCtx.fillStyle = '#420813';
           targetCtx.beginPath();
           targetCtx.arc(radius * 0.36, 0, radius * 0.84, 0, Math.PI * 2);
           targetCtx.fill();
           targetCtx.restore();
         }
 
-        const goldMain = 'rgba(206, 152, 118, 0.78)';
-        const goldSoft = 'rgba(196, 140, 108, 0.50)';
-        const goldBright = 'rgba(225, 176, 138, 0.88)';
+        const goldMain = 'rgba(212, 160, 126, 0.82)';
+        const goldSoft = 'rgba(202, 148, 114, 0.56)';
+        const goldBright = 'rgba(232, 184, 146, 0.90)';
 
-        // Внешние кольца
         ctx.strokeStyle = goldSoft;
         ctx.lineWidth = 3;
         ctx.beginPath();
@@ -439,7 +441,6 @@
         ctx.arc(cx, cy, size * 0.422, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Центральные кольца
         ctx.strokeStyle = goldMain;
         ctx.lineWidth = 3.2;
         ctx.beginPath();
@@ -451,7 +452,6 @@
         ctx.arc(cx, cy, size * 0.132, 0, Math.PI * 2);
         ctx.stroke();
 
-        // Солнечные лучи
         const rayCount = 48;
         for (let i = 0; i < rayCount; i++) {
           const a = (i / rayCount) * Math.PI * 2;
@@ -470,7 +470,6 @@
           ctx.fill();
         }
 
-        // Центральная 8-лучевая звезда
         drawStar(ctx, cx, cy, size * 0.118, size * 0.024, 4, goldBright);
         ctx.save();
         ctx.translate(cx, cy);
@@ -479,11 +478,9 @@
         ctx.restore();
         drawStar(bctx, cx, cy, size * 0.118, size * 0.024, 4, '#d8d8d8');
 
-        // Полумесяцы по бокам
         drawCrescent(ctx, cx - size * 0.34, cy, size * 0.036, 0.0, goldMain);
         drawCrescent(ctx, cx + size * 0.34, cy, size * 0.036, Math.PI, goldMain);
 
-        // Звёздочки по периметру
         [
           [0, -0.33, 0.034], [0, 0.33, 0.034],
           [-0.26, -0.22, 0.022], [0.26, -0.22, 0.022],
@@ -494,9 +491,10 @@
           drawStar(ctx, cx + ox * size, cy + oy * size, sr * size, sr * size * 0.24, 4, goldMain);
         });
 
-        const edgeFade = ctx.createRadialGradient(cx, cy, size * 0.32, cx, cy, size * 0.5);
+        // Очень лёгкое смягчение самого края (вместо сильного затемнения)
+        const edgeFade = ctx.createRadialGradient(cx, cy, size * 0.36, cx, cy, size * 0.5);
         edgeFade.addColorStop(0, 'rgba(0,0,0,0)');
-        edgeFade.addColorStop(1, 'rgba(8, 1, 3, 0.58)');
+        edgeFade.addColorStop(1, 'rgba(18, 3, 6, 0.18)');
         ctx.fillStyle = edgeFade;
         ctx.fillRect(0, 0, size, size);
 
@@ -508,7 +506,7 @@
       }
 
       // =====================================================================
-      // 5. 3D-СТОЛ (ТОЧНЫЙ РАЗМЕР ПОД СТОЛ НА ФОН.png)
+      // 5. 3D-СТОЛ
       // =====================================================================
       const TABLE_Y = 0.0;
       const TABLE_RADIUS = 2.42;
@@ -524,15 +522,14 @@
         map: diffuseTex,
         bumpMap: bumpTex,
         bumpScale: 0.024,
-        roughness: 0.84,
-        metalness: 0.07
+        roughness: 0.88,
+        metalness: 0.04
       });
       const tableTopMesh = new THREE.Mesh(tableTopGeo, tableTopMat);
       tableTopMesh.position.y = -0.06;
       tableTopMesh.receiveShadow = true;
       tableGroup.add(tableTopMesh);
 
-      // Юбка скатерти со складками
       const skirtGeo = new THREE.CylinderGeometry(TABLE_RADIUS * 1.005, TABLE_RADIUS * 1.12, 2.1, 96, 12, true);
       const posAttr = skirtGeo.attributes.position;
       for (let i = 0; i < posAttr.count; i++) {
@@ -552,11 +549,11 @@
       skirtGeo.computeVertexNormals();
 
       const skirtMat = new THREE.MeshStandardMaterial({
-        color: 0x36050c,
+        color: 0x480914,
         bumpMap: bumpTex,
         bumpScale: 0.032,
-        roughness: 0.88,
-        metalness: 0.04
+        roughness: 0.90,
+        metalness: 0.02
       });
       const skirtMesh = new THREE.Mesh(skirtGeo, skirtMat);
       skirtMesh.position.y = -1.11;
@@ -564,7 +561,7 @@
       tableGroup.add(skirtMesh);
 
       // =====================================================================
-      // 6. ПРЕДЗАГРУЗКА ВСЕХ 78 ЛИЦЕВЫХ ТЕКСТУР + РУБАШКИ
+      // 6. УМНАЯ ЗАГРУЗКА ВСЕХ 78 ЛИЦЕВЫХ PNG + РУБАШКИ (МАТОВЫЕ МАТЕРИАЛЫ)
       // =====================================================================
       const texLoader = new THREE.TextureLoader();
 
@@ -584,24 +581,6 @@
         g.strokeRect(24, 24, 464, 816);
         g.lineWidth = 2.5;
         g.strokeRect(38, 38, 436, 788);
-        g.save();
-        g.translate(256, 432);
-        g.strokeStyle = 'rgba(218, 170, 120, 0.85)';
-        g.lineWidth = 3;
-        g.beginPath();
-        g.arc(0, 0, 125, 0, Math.PI * 2);
-        g.stroke();
-        g.fillStyle = '#e0b484';
-        g.beginPath();
-        for (let i = 0; i < 16; i++) {
-          const r = i % 2 === 0 ? 92 : 20;
-          const a = (i * Math.PI) / 8 - Math.PI / 2;
-          if (i === 0) g.moveTo(Math.cos(a) * r, Math.sin(a) * r);
-          else g.lineTo(Math.cos(a) * r, Math.sin(a) * r);
-        }
-        g.closePath();
-        g.fill();
-        g.restore();
         const t = new THREE.CanvasTexture(c);
         t.colorSpace = THREE.SRGBColorSpace;
         return t;
@@ -613,42 +592,28 @@
         c.height = 864;
         const g = c.getContext('2d');
         const bg = g.createLinearGradient(0, 0, 0, 864);
-        bg.addColorStop(0, '#1c0b12');
-        bg.addColorStop(0.5, '#2c1118');
-        bg.addColorStop(1, '#12060a');
+        bg.addColorStop(0, '#240d15');
+        bg.addColorStop(0.5, '#33121c');
+        bg.addColorStop(1, '#18080d');
         g.fillStyle = bg;
         g.fillRect(0, 0, 512, 864);
         g.strokeStyle = '#d9ae7e';
         g.lineWidth = 9;
         g.strokeRect(22, 22, 468, 820);
-        g.lineWidth = 2;
-        g.strokeRect(38, 38, 436, 788);
         g.fillStyle = '#f3dcc0';
-        g.font = '600 34px Georgia, serif';
+        g.font = '600 36px Georgia, serif';
         g.textAlign = 'center';
-        const words = cardName.split(' ');
-        const lines = [];
-        let line = '';
-        for (const w of words) {
-          const test = line ? line + ' ' + w : w;
-          if (g.measureText(test).width > 380) {
-            lines.push(line);
-            line = w;
-          } else {
-            line = test;
-          }
-        }
-        if (line) lines.push(line);
-        lines.forEach((ln, idx) => g.fillText(ln, 256, 420 + idx * 44));
+        g.fillText(cardName, 256, 440);
         const t = new THREE.CanvasTexture(c);
         t.colorSpace = THREE.SRGBColorSpace;
         return t;
       }
 
+      // Полностью матовая рубашка (без бликов)
       const backMaterial = new THREE.MeshStandardMaterial({
         map: createFallbackBackTexture(),
-        roughness: 0.45,
-        metalness: 0.14
+        roughness: 0.92,
+        metalness: 0.0
       });
 
       texLoader.load(
@@ -663,18 +628,51 @@
         () => {}
       );
 
-      // Загрузка PNG-текстуры для конкретной карты (с возвратом Promise)
+      // Генерируем возможные варианты имени файла (на случай е/ё или разного регистра)
+      function buildFilenameCandidates(cardName) {
+        const list = [];
+        const add = (n) => {
+          const url = encodeURI(n + '.png');
+          if (!list.includes(url)) list.push(url);
+        };
+
+        add(cardName);
+
+        // Вариант с ё (Влюблённые, Четвёрка, Пятёрка, Шестёрка, Семёрка, Восьмёрка)
+        const yoMap = {
+          'Влюбленные': 'Влюблённые',
+          'Четверка': 'Четвёрка',
+          'Пятерка': 'Пятёрка',
+          'Шестерка': 'Шестёрка',
+          'Семерка': 'Семёрка',
+          'Восьмерка': 'Восьмёрка'
+        };
+        let withYo = cardName;
+        for (const [k, v] of Object.entries(yoMap)) {
+          if (withYo.includes(k)) withYo = withYo.replace(k, v);
+        }
+        if (withYo !== cardName) add(withYo);
+
+        // Вариант со строчной буквы
+        add(cardName.toLowerCase());
+        if (withYo !== cardName) add(withYo.toLowerCase());
+
+        // Вариант с заглавными словами (например «Колесо Фортуны», «Страшный Суд»)
+        const titleCase = cardName.replace(/(^|\s)\S/g, (s) => s.toUpperCase());
+        if (titleCase !== cardName) add(titleCase);
+
+        return list;
+      }
+
       function loadCardTextureIntoMaterial(cardObj) {
         if (cardObj.texturePromise) return cardObj.texturePromise;
 
         cardObj.texturePromise = new Promise((resolve) => {
-          const candidates = [encodeURI(cardObj.name + '.png')];
-          if (cardObj.name === '8 аркан - Сила') {
-            candidates.push(encodeURI('8 аркан -  Сила.png'));
-          }
+          const candidates = buildFilenameCandidates(cardObj.name);
 
           function tryIdx(i) {
             if (i >= candidates.length) {
+              console.warn('Не найден PNG для карты:', cardObj.name);
               const fb = createFallbackFaceTexture(cardObj.name);
               cardObj.faceMaterial.map = fb;
               cardObj.faceMaterial.needsUpdate = true;
@@ -703,44 +701,112 @@
       }
 
       // =====================================================================
-      // 7. 78 ОБЪЁМНЫХ 3D-КАРТ С ПОДДЕРЖКОЙ РЕАЛЬНОГО ПЛАВНОГО ИЗГИБА
+      // 7. 78 ОБЪЁМНЫХ 3D-КАРТ С ЗАКРУГЛЁННЫМИ УГОЛКАМИ И РЕАЛЬНОЙ ВЫСОТОЙ КОЛОДЫ
       // =====================================================================
       const CARD_W = 0.50;
-      const CARD_H = 0.86;          // Классические пропорции Таро (~1 : 1.72)
-      const CARD_THICKNESS = 0.0125; // Ощутимая 3D-толщина, не пропадает боком!
-      const CARD_STEP = CARD_THICKNESS * 1.07; // Шаг без пересечения/проваливания
+      const CARD_H = 0.86;
+      const CARD_CORNER_RADIUS = 0.044; // Аккуратные закруглённые уголки карт Таро
+      const CARD_THICKNESS = 0.0058;    // Высота колоды из 78 карт ≈ 0.48 (в ~2 раза компактнее, «полтора из трёх»)
+      const CARD_STEP = CARD_THICKNESS * 1.05;
       const DECK_HOME = new THREE.Vector3(0, TABLE_Y, -1.18);
 
-      // Базовая подразделённая геометрия для плавного 3D-сгибания (гармошка / риффл)
-      const baseCardGeo = new THREE.BoxGeometry(CARD_W, CARD_THICKNESS, CARD_H, 6, 1, 10);
+      // Генератор 3D-геометрии карты с закруглёнными уголками и физически правильными UV:
+      // - Верхняя грань (+Y = рубашка): верх картинки на -Z, право на +X
+      // - Нижняя грань (-Y = лицо): верх картинки на -Z, право на -X (при перевороте вокруг вертикали встаёт идеально ровно!)
+      function createRoundedCardGeometry(width, thickness, height, radius, segX, segZ) {
+        const geo = new THREE.BoxGeometry(width, thickness, height, segX, 1, segZ);
+        const pos = geo.attributes.position;
+        const uv = geo.attributes.uv;
+        const hw = width * 0.5;
+        const hh = height * 0.5;
+        const r = Math.min(radius, hw * 0.45, hh * 0.45);
+        const iw = hw - r;
+        const ih = hh - r;
+
+        // 1. Закругляем 4 уголка в плоскости XZ (гладкое отображение квадрата угла в четверть круга)
+        for (let i = 0; i < pos.count; i++) {
+          let x = pos.getX(i);
+          let z = pos.getZ(i);
+          const ax = Math.abs(x);
+          const az = Math.abs(z);
+
+          if (ax > iw && az > ih) {
+            const dx = ax - iw;
+            const dz = az - ih;
+            const len = Math.hypot(dx, dz);
+            if (len > 1e-6) {
+              const scale = Math.max(dx, dz) / len;
+              x = Math.sign(x) * (iw + dx * scale);
+              z = Math.sign(z) * (ih + dz * scale);
+              pos.setX(i, x);
+              pos.setZ(i, z);
+            }
+          }
+        }
+
+        // 2. Пересчитываем чистые UV для верхней (+Y, group 2) и нижней (-Y, group 3) граней
+        //    чтобы изображение карты не искажалось на закруглённых углах и не переворачивалось
+        const index = geo.index;
+        const topGroup = geo.groups[2];    // +Y (рубашка)
+        const bottomGroup = geo.groups[3]; // -Y (лицевая сторона)
+
+        const topVerts = new Set();
+        for (let i = topGroup.start; i < topGroup.start + topGroup.count; i++) {
+          topVerts.add(index ? index.getX(i) : i);
+        }
+        topVerts.forEach((vi) => {
+          const x = pos.getX(vi);
+          const z = pos.getZ(vi);
+          const u = (x + hw) / width;         // -hw -> 0 (лево), +hw -> 1 (право)
+          const v = 1.0 - (z + hh) / height;  // -hh -> 1 (верх), +hh -> 0 (низ)
+          uv.setXY(vi, u, v);
+        });
+
+        const bottomVerts = new Set();
+        for (let i = bottomGroup.start; i < bottomGroup.start + bottomGroup.count; i++) {
+          bottomVerts.add(index ? index.getX(i) : i);
+        }
+        bottomVerts.forEach((vi) => {
+          const x = pos.getX(vi);
+          const z = pos.getZ(vi);
+          const u = 1.0 - (x + hw) / width;   // +hw -> 0 (лево лица), -hw -> 1 (право лица)
+          const v = 1.0 - (z + hh) / height;  // -hh -> 1 (верх лица), +hh -> 0 (низ лица)
+          uv.setXY(vi, u, v);
+        });
+
+        pos.needsUpdate = true;
+        uv.needsUpdate = true;
+        geo.computeVertexNormals();
+        return geo;
+      }
+
+      // Подразделённая скруглённая сетка для плавного 3D-изгиба
+      const baseCardGeo = createRoundedCardGeometry(CARD_W, CARD_THICKNESS, CARD_H, CARD_CORNER_RADIUS, 10, 14);
       const basePosArray = new Float32Array(baseCardGeo.attributes.position.array);
 
-      // Золотисто-пергаментный торец карты (хорошо читается при повороте боком)
+      // Матовый золотисто-бумажный торец
       const edgeMaterial = new THREE.MeshStandardMaterial({
-        color: 0xd4ae7c,
-        roughness: 0.48,
-        metalness: 0.28
+        color: 0xc9a578,
+        roughness: 0.86,
+        metalness: 0.04
       });
 
       const cards = [];
       const deckGroup = new THREE.Group();
       scene.add(deckGroup);
 
-      // Порядок индексов карт в колоде: 0 = самая нижняя, 77 = самая верхняя
       let deckOrder = [];
 
       for (let i = 0; i < TAROT_CARDS.length; i++) {
-        // Каждой карте — своя клонированная геометрия (для независимого плавного изгиба)
         const geo = baseCardGeo.clone();
 
-        // Индивидуальный материал лицевой стороны для каждой из 78 карт
+        // Индивидуальный полностью МАТОВЫЙ материал лицевой стороны для каждой из 78 карт
         const faceMaterial = new THREE.MeshStandardMaterial({
           color: 0xffffff,
-          roughness: 0.40,
-          metalness: 0.06
+          roughness: 0.94,
+          metalness: 0.0
         });
 
-        // Грани BoxGeometry: [0:right, 1:left, 2:top(+Y рубашка), 3:bottom(-Y лицо), 4:front, 5:back]
         const materials = [
           edgeMaterial,
           edgeMaterial,
@@ -764,9 +830,9 @@
           texturePromise: null,
           bendX: 0,
           bendZ: 0,
-          jitterX: (Math.random() - 0.5) * 0.008,
-          jitterZ: (Math.random() - 0.5) * 0.008,
-          jitterYRot: (Math.random() - 0.5) * 0.022
+          jitterX: (Math.random() - 0.5) * 0.007,
+          jitterZ: (Math.random() - 0.5) * 0.007,
+          jitterYRot: (Math.random() - 0.5) * 0.02
         };
 
         cards.push(cardObj);
@@ -774,7 +840,6 @@
         deckGroup.add(mesh);
       }
 
-      // Плавный физичный 3D-изгиб конкретной карты (без резких изломов)
       function setCardBend(cardObj, bendX, bendZ) {
         if (Math.abs(cardObj.bendX - bendX) < 0.0004 && Math.abs(cardObj.bendZ - bendZ) < 0.0004) {
           return;
@@ -791,9 +856,8 @@
           const ox = basePosArray[i];
           const oy = basePosArray[i + 1];
           const oz = basePosArray[i + 2];
-          const nx = ox / halfW; // -1 .. +1
-          const nz = oz / halfH; // -1 .. +1
-          // Параболический упругий изгиб, скомпенсированный по центру
+          const nx = ox / halfW;
+          const nz = oz / halfH;
           const dy = bendZ * (nz * nz - 0.33) + bendX * (nx * nx - 0.33);
           arr[i] = ox;
           arr[i + 1] = oy + dy;
@@ -811,16 +875,15 @@
         }
       }
 
-      // Фоновая пакетная предзагрузка ВСЕХ 78 лицевых текстур сразу при открытии мини-апа
+      // Предзагрузка всех 78 лицевых PNG-картинок сразу при старте
       (async function preloadAll78Textures() {
-        const batchSize = 6;
+        const batchSize = 8;
         for (let i = 0; i < cards.length; i += batchSize) {
           const slice = cards.slice(i, i + batchSize);
           await Promise.all(slice.map((c) => loadCardTextureIntoMaterial(c)));
         }
       })();
 
-      // Начальное перемешивание порядка колоды на старте (пока все лежат рубашкой вверх)
       function fisherYatesShuffle(arr) {
         for (let i = arr.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
@@ -863,11 +926,11 @@
       const deckAura = new THREE.Mesh(
         new THREE.PlaneGeometry(1.45, 1.85),
         new THREE.MeshBasicMaterial({
-          map: createSoftGlowSprite('rgba(255, 198, 132, 0.58)', 'rgba(175, 42, 62, 0.22)'),
+          map: createSoftGlowSprite('rgba(255, 198, 132, 0.56)', 'rgba(175, 42, 62, 0.20)'),
           transparent: true,
           depthWrite: false,
           blending: THREE.AdditiveBlending,
-          opacity: 0.72
+          opacity: 0.70
         })
       );
       deckAura.rotation.x = -Math.PI / 2;
@@ -890,7 +953,7 @@
         transparent: true,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
-        opacity: 0.52
+        opacity: 0.50
       });
       scene.add(new THREE.Points(smokeGeo, smokeMat));
 
@@ -911,25 +974,25 @@
         transparent: true,
         depthWrite: false,
         blending: THREE.AdditiveBlending,
-        opacity: 0.85
+        opacity: 0.82
       });
       scene.add(new THREE.Points(sparkGeo, sparkMat));
 
       let magicEffectsIntensity = 1.0;
 
       function updateMagicParticles(time, dt) {
-        deckAura.material.opacity = (0.62 + Math.sin(time * 2.2) * 0.16) * magicEffectsIntensity;
+        deckAura.material.opacity = (0.60 + Math.sin(time * 2.2) * 0.16) * magicEffectsIntensity;
         const sc = 1.0 + Math.sin(time * 1.7) * 0.05;
         deckAura.scale.set(sc, sc, 1);
 
-        smokeMat.opacity = 0.48 * magicEffectsIntensity;
-        sparkMat.opacity = 0.85 * magicEffectsIntensity;
+        smokeMat.opacity = 0.46 * magicEffectsIntensity;
+        sparkMat.opacity = 0.82 * magicEffectsIntensity;
 
         const sp = smokeGeo.attributes.position.array;
         for (let i = 0; i < SMOKE_COUNT; i++) {
           const d = smokeData[i];
           d.phase = (d.phase + dt * d.speed * 0.34) % 1;
-          const y = TABLE_Y + 0.12 + d.phase * 1.45;
+          const y = TABLE_Y + 0.10 + d.phase * 1.35;
           const r = d.radius + d.phase * 0.25;
           const a = d.angle + time * 0.25 + d.phase * 1.2;
           sp[i * 3] = DECK_HOME.x + Math.cos(a) * r;
@@ -942,7 +1005,7 @@
         for (let i = 0; i < SPARK_COUNT; i++) {
           const d = sparkData[i];
           d.phase = (d.phase + dt * d.speed * 0.40) % 1;
-          const y = TABLE_Y + 0.08 + d.phase * 1.65;
+          const y = TABLE_Y + 0.08 + d.phase * 1.55;
           const r = d.radius * (0.85 + d.phase * 0.4);
           const a = d.angle + time * d.swirl;
           kp[i * 3] = DECK_HOME.x + Math.cos(a) * r;
@@ -974,14 +1037,13 @@
         });
       }
 
-      // Точная укладка стопки вдоль локальной оси нормали без пересечений
       function computeStackTransform(centerPos, quat, index, totalCount) {
         const normal = new THREE.Vector3(0, 1, 0).applyQuaternion(quat);
         const offset = (index - (totalCount - 1) * 0.5) * CARD_STEP;
         return centerPos.clone().addScaledVector(normal, offset);
       }
 
-      async function animMoveDeckTo(centerPos, euler, duration = 420) {
+      async function animMoveDeckTo(centerPos, euler, duration = 400) {
         const starts = deckOrder.map((id) => ({
           pos: cards[id].mesh.position.clone(),
           quat: cards[id].mesh.quaternion.clone()
@@ -1001,29 +1063,24 @@
       }
 
       // =====================================================================
-      // 10. 6 РЕАЛИСТИЧНЫХ ФИЗИЧНЫХ 3D-ТАСОВОК (БЕЗ ПРОВАЛИВАНИЯ КАРТ)
+      // 10. 6 РЕАЛИСТИЧНЫХ 3D-ТАСОВОК (БЕЗ ПРОВАЛИВАНИЯ КАРТ)
       // =====================================================================
 
-      // ТАСОВКА 1: Поворот колоды на 90° (на ребро) + быстрый сброс карт по одной вниз с подкручиванием
+      // 1. Поворот колоды на ~90° на ребро + быстрый сброс карт по одной вниз
       async function shuffleVertical90Drop() {
-        const topHand = new THREE.Vector3(0.46, 1.56, -0.35);
-        const botHand = new THREE.Vector3(-0.34, 1.02, -0.30);
+        const topHand = new THREE.Vector3(0.44, 1.52, -0.35);
+        const botHand = new THREE.Vector3(-0.32, 1.00, -0.30);
 
-        // Поворачиваем колоду почти на 90° на ребро (вертикально в невидимых руках)
-        const eulerTop = new THREE.Euler(0.18, 0.14, 1.38); // ~80-90° на ребро
+        const eulerTop = new THREE.Euler(0.18, 0.14, 1.38);
         const eulerBot = new THREE.Euler(0.14, -0.10, 1.18);
-        const qTop = new THREE.Quaternion().setFromEuler(eulerTop);
         const qBot = new THREE.Quaternion().setFromEuler(eulerBot);
 
-        await animMoveDeckTo(topHand, eulerTop, 400);
+        await animMoveDeckTo(topHand, eulerTop, 390);
         haptic('light');
 
-        // Карты реально берутся с края текущей колоды по одной и мелкими порциями
         let remaining = [...deckOrder];
         let caught = [];
         const total = deckOrder.length;
-
-        // Серия быстрых одиночных сбросов + пара мелких пачек
         const pattern = [1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 3, 1, 1, 1, 1, 4, 1, 1, 1, 5, 1, 1, 6, 8];
 
         for (const stepCount of pattern) {
@@ -1036,25 +1093,22 @@
           const baseIdx = caught.length;
           caught.push(...chunk);
 
-          const dur = stepCount === 1 ? 65 : 105;
+          const dur = stepCount === 1 ? 62 : 100;
           await animateDuration(dur, (raw) => {
             const t = easeOutCubic(raw);
             for (let k = 0; k < chunk.length; k++) {
               const c = cards[chunk[k]];
               const dst = computeStackTransform(botHand, qBot, baseIdx + k, total);
               c.mesh.position.lerpVectors(starts[k].pos, dst, t);
-              // Лёгкая дуга в сторону, чтобы карта НЕ проходила сквозь оставшуюся стопку
               const arc = Math.sin(t * Math.PI);
               c.mesh.position.z += arc * 0.18;
               c.mesh.position.y += arc * 0.08;
               c.mesh.quaternion.slerpQuaternions(starts[k].quat, qBot, t);
-              // Небольшое живое подкручивание при падении
               c.mesh.rotateX(arc * 0.22);
             }
           });
         }
 
-        // Остаток из верхней руки эффектно уходит по внешней дуге в конец (под низ) колоды
         if (remaining.length > 0) {
           haptic('medium');
           const restSet = new Set(remaining);
@@ -1063,10 +1117,10 @@
             pos: cards[id].mesh.position.clone(),
             quat: cards[id].mesh.quaternion.clone()
           }));
-          const centerPos = new THREE.Vector3(0, 1.24, -0.32);
+          const centerPos = new THREE.Vector3(0, 1.22, -0.32);
           const qEnd = new THREE.Quaternion().setFromEuler(new THREE.Euler(0.18, 0, 0.06));
 
-          await animateDuration(380, (raw) => {
+          await animateDuration(370, (raw) => {
             const t = easeInOutCubic(raw);
             for (let i = 0; i < deckOrder.length; i++) {
               const id = deckOrder[i];
@@ -1075,9 +1129,9 @@
               c.mesh.position.lerpVectors(allStarts[i].pos, dst, t);
               if (restSet.has(id)) {
                 const arc = Math.sin(t * Math.PI);
-                c.mesh.position.x += arc * 0.32;
-                c.mesh.position.z -= arc * 0.42;
-                c.mesh.position.y -= arc * 0.16;
+                c.mesh.position.x += arc * 0.30;
+                c.mesh.position.z -= arc * 0.40;
+                c.mesh.position.y -= arc * 0.15;
               }
               c.mesh.quaternion.slerpQuaternions(allStarts[i].quat, qEnd, t);
             }
@@ -1085,20 +1139,18 @@
         }
       }
 
-      // ТАСОВКА 2: Упругая «Гармошка» (Card Spring) с реальным плавным 3D-изгибом каждой карты
+      // 2. Упругая «Гармошка» с плавным 3D-изгибом каждой карты
       async function shuffleSmoothSpring() {
-        const leftHand = new THREE.Vector3(-0.78, 1.44, -0.30);
-        const rightHand = new THREE.Vector3(0.78, 1.22, -0.30);
+        const leftHand = new THREE.Vector3(-0.76, 1.40, -0.30);
+        const rightHand = new THREE.Vector3(0.76, 1.20, -0.30);
         const eLeft = new THREE.Euler(0.22, 0.26, -0.44);
         const eRight = new THREE.Euler(0.18, -0.22, 0.34);
-        const qLeft = new THREE.Quaternion().setFromEuler(eLeft);
         const qRight = new THREE.Quaternion().setFromEuler(eRight);
 
-        await animMoveDeckTo(leftHand, eLeft, 380);
+        await animMoveDeckTo(leftHand, eLeft, 360);
         haptic('medium');
 
-        // Плавно сгибаем колоду в левой руке перед «выстрелом» гармошки
-        await animateDuration(180, (raw) => {
+        await animateDuration(170, (raw) => {
           const bend = easeOutCubic(raw) * 0.095;
           for (let i = 0; i < deckOrder.length; i++) {
             setCardBend(cards[deckOrder[i]], 0, bend);
@@ -1111,11 +1163,9 @@
           quat: cards[id].mesh.quaternion.clone()
         }));
 
-        // Все 78 карт последовательно, без проваливания, плавно перелетают дугой с живым изгибом
-        await animateDuration(1180, (raw) => {
+        await animateDuration(1150, (raw) => {
           for (let i = 0; i < total; i++) {
             const c = cards[deckOrder[i]];
-            // Нижние карты срываются первыми (i=0..77) и ложатся ровно на своё место (i=0..77) в правой руке!
             const delay = (i / total) * 0.60;
             const localT = THREE.MathUtils.clamp((raw - delay) / 0.40, 0, 1);
             const t = easeInOutSine(localT);
@@ -1129,7 +1179,6 @@
 
             c.mesh.quaternion.slerpQuaternions(starts[i].quat, qRight, t);
             if (localT > 0 && localT < 1) {
-              // Плавный изгиб дугой в полёте и мягкое распрямление при приземлении
               const flyBend = (1 - localT) * 0.095 + arc * 0.065;
               setCardBend(c, -arc * 0.04, flyBend);
               c.mesh.rotateZ(-arc * 0.36);
@@ -1140,10 +1189,10 @@
         });
 
         flattenAllCards();
-        await animMoveDeckTo(new THREE.Vector3(0, 1.24, -0.32), new THREE.Euler(0.18, 0, 0), 340);
+        await animMoveDeckTo(new THREE.Vector3(0, 1.22, -0.32), new THREE.Euler(0.18, 0, 0), 330);
       }
 
-      // ТАСОВКА 3: Настольный Риффл с реальным прогибом краёв и «мостиком» (Bridge)
+      // 3. Настольный Риффл с плавным прогибом краёв и выравниванием
       async function shuffleTableRiffleBridge() {
         const half = Math.floor(deckOrder.length / 2);
         const leftHalf = deckOrder.slice(0, half);
@@ -1159,8 +1208,7 @@
           quat: cards[id].mesh.quaternion.clone()
         }));
 
-        // 1. Делим колоду на две стопки на столе (левая и правая)
-        await animateDuration(420, (raw) => {
+        await animateDuration(410, (raw) => {
           const t = easeInOutCubic(raw);
           for (let i = 0; i < deckOrder.length; i++) {
             const isLeft = i < half;
@@ -1174,8 +1222,7 @@
           }
         });
 
-        // 2. Пальцы невидимых рук плавно прогибают внутренние края обеих стопок вверх
-        await animateDuration(200, (raw) => {
+        await animateDuration(190, (raw) => {
           const b = easeOutCubic(raw) * 0.08;
           for (let i = 0; i < leftHalf.length; i++) setCardBend(cards[leftHalf[i]], b, 0);
           for (let i = 0; i < rightHalf.length; i++) setCardBend(cards[rightHalf[i]], b, 0);
@@ -1183,7 +1230,6 @@
 
         haptic('medium');
 
-        // 3. Честное поочерёдное пролистывание без пересечения высот
         const interleaved = [];
         let li = 0, ri = 0;
         while (li < leftHalf.length || ri < rightHalf.length) {
@@ -1197,7 +1243,7 @@
           quat: cards[item.id].mesh.quaternion.clone()
         }));
 
-        await animateDuration(840, (raw) => {
+        await animateDuration(820, (raw) => {
           for (let i = 0; i < interleaved.length; i++) {
             const item = interleaved[i];
             const c = cards[item.id];
@@ -1212,17 +1258,16 @@
             const arc = Math.sin(localT * Math.PI);
             c.mesh.position.set(
               THREE.MathUtils.lerp(riffleStarts[i].pos.x, targetX, t),
-              THREE.MathUtils.lerp(riffleStarts[i].pos.y, targetY, t) + arc * 0.16,
+              THREE.MathUtils.lerp(riffleStarts[i].pos.y, targetY, t) + arc * 0.15,
               THREE.MathUtils.lerp(riffleStarts[i].pos.z, targetZ, t)
             );
-            c.mesh.rotation.set(0, item.side * -0.04 * (1 - t), -item.side * arc * 0.26);
+            c.mesh.rotation.set(0, item.side * -0.04 * (1 - t), -item.side * arc * 0.24);
             setCardBend(c, (1 - t) * 0.08 + arc * 0.04, 0);
           }
         });
 
         deckOrder = interleaved.map((it) => it.id);
 
-        // 4. Аккуратное выравнивание («подбивка») стопки в ровную колоду
         const sqStarts = deckOrder.map((id) => ({
           pos: cards[id].mesh.position.clone(),
           quat: cards[id].mesh.quaternion.clone()
@@ -1230,7 +1275,7 @@
         const qFlat = new THREE.Quaternion();
         haptic('light');
 
-        await animateDuration(320, (raw) => {
+        await animateDuration(310, (raw) => {
           const t = easeInOutCubic(raw);
           for (let i = 0; i < deckOrder.length; i++) {
             const c = cards[deckOrder[i]];
@@ -1242,13 +1287,13 @@
         });
       }
 
-      // ТАСОВКА 4: Вытягивание толстых пачек (18-28 карт) из середины в начало и в конец
+      // 4. Вытягивание пачек из середины (18-28 карт) наверх и под низ
       async function shuffleCenterPacketPulls() {
-        const center = new THREE.Vector3(0, 1.24, -0.32);
+        const center = new THREE.Vector3(0, 1.22, -0.32);
         const holdEuler = new THREE.Euler(0.22, 0.06, 0.03);
         const holdQuat = new THREE.Quaternion().setFromEuler(holdEuler);
 
-        await animMoveDeckTo(center, holdEuler, 360);
+        await animMoveDeckTo(center, holdEuler, 350);
 
         const moves = [
           { toTop: true, sideSign: 1 },
@@ -1266,8 +1311,7 @@
           const midStarts = middlePart.map((id) => cards[id].mesh.position.clone());
           haptic('light');
 
-          // Выдвигаем ровно вбок (чисто, без пересечений)
-          await animateDuration(240, (raw) => {
+          await animateDuration(230, (raw) => {
             const t = easeOutCubic(raw);
             for (let k = 0; k < middlePart.length; k++) {
               const c = cards[middlePart[k]];
@@ -1282,7 +1326,7 @@
 
           const phase2Starts = deckOrder.map((id) => cards[id].mesh.position.clone());
 
-          await animateDuration(360, (raw) => {
+          await animateDuration(350, (raw) => {
             const t = easeInOutCubic(raw);
             for (let i = 0; i < deckOrder.length; i++) {
               const id = deckOrder[i];
@@ -1292,7 +1336,7 @@
               if (midSet.has(id)) {
                 const arc = Math.sin(t * Math.PI);
                 c.mesh.position.x += move.sideSign * 0.24 * arc;
-                c.mesh.position.y += (move.toTop ? 0.34 : -0.34) * arc;
+                c.mesh.position.y += (move.toTop ? 0.30 : -0.30) * arc;
               }
               c.mesh.quaternion.copy(holdQuat);
             }
@@ -1300,15 +1344,15 @@
         }
       }
 
-      // ТАСОВКА 5: Индусская тасовка (Hindu Shuffle — классика для плотных карт Таро)
+      // 5. Индусская тасовка (Hindu Shuffle)
       async function shuffleHindu() {
-        const backHand = new THREE.Vector3(0, 1.38, -0.78);
-        const frontHand = new THREE.Vector3(0, 1.08, 0.14);
+        const backHand = new THREE.Vector3(0, 1.35, -0.78);
+        const frontHand = new THREE.Vector3(0, 1.06, 0.14);
         const eBack = new THREE.Euler(0.14, 0.05, 0);
         const eFront = new THREE.Euler(0.06, -0.04, 0);
         const qFront = new THREE.Quaternion().setFromEuler(eFront);
 
-        await animMoveDeckTo(backHand, eBack, 380);
+        await animMoveDeckTo(backHand, eBack, 360);
         haptic('light');
 
         let remaining = [...deckOrder];
@@ -1326,13 +1370,13 @@
           frontPile.push(...chunk);
 
           haptic('light');
-          await animateDuration(170, (raw) => {
+          await animateDuration(165, (raw) => {
             const t = easeOutCubic(raw);
             for (let k = 0; k < chunk.length; k++) {
               const c = cards[chunk[k]];
               const dst = computeStackTransform(frontHand, qFront, baseIdx + k, total);
               c.mesh.position.lerpVectors(starts[k].pos, dst, t);
-              c.mesh.position.y += Math.sin(t * Math.PI) * 0.16;
+              c.mesh.position.y += Math.sin(t * Math.PI) * 0.15;
               c.mesh.quaternion.slerpQuaternions(starts[k].quat, qFront, t);
             }
           });
@@ -1341,7 +1385,7 @@
         deckOrder = frontPile;
       }
 
-      // ТАСОВКА 6: Тройной настольный срез (Three-Packet Table Cut)
+      // 6. Тройной настольный срез
       async function shuffleThreePacketCut() {
         const p1 = 24 + Math.floor(Math.random() * 6);
         const p2 = 24 + Math.floor(Math.random() * 6);
@@ -1362,9 +1406,8 @@
           quat: cards[id].mesh.quaternion.clone()
         }));
 
-        // 1. Раскладываем на 3 аккуратные стопки на столе
         haptic('light');
-        await animateDuration(420, (raw) => {
+        await animateDuration(410, (raw) => {
           const t = easeInOutCubic(raw);
           let globalIdx = 0;
           for (let p = 0; p < 3; p++) {
@@ -1373,16 +1416,15 @@
               const c = cards[pile[k]];
               const dst = new THREE.Vector3(slots[p].x, TABLE_Y + CARD_THICKNESS * 0.5 + k * CARD_STEP, slots[p].z);
               c.mesh.position.lerpVectors(starts1[globalIdx].pos, dst, t);
-              c.mesh.position.y += Math.sin(t * Math.PI) * (0.18 + p * 0.08);
+              c.mesh.position.y += Math.sin(t * Math.PI) * (0.16 + p * 0.07);
               c.mesh.quaternion.slerpQuaternions(starts1[globalIdx].quat, qFlat, t);
               globalIdx++;
             }
           }
         });
 
-        await waitMs(110);
+        await waitMs(100);
 
-        // 2. Собираем обратно в новом порядке: mid -> top -> bot (без пересечений, по очереди)
         const gatherOrder = [mid, top, bot];
         deckOrder = [...mid, ...top, ...bot];
         const centerSlot = new THREE.Vector3(0, TABLE_Y, -0.40);
@@ -1392,7 +1434,7 @@
           const pile = gatherOrder[g];
           const pStarts = pile.map((id) => cards[id].mesh.position.clone());
           haptic('light');
-          await animateDuration(290, (raw) => {
+          await animateDuration(280, (raw) => {
             const t = easeInOutCubic(raw);
             for (let k = 0; k < pile.length; k++) {
               const c = cards[pile[k]];
@@ -1402,14 +1444,13 @@
                 centerSlot.z + c.jitterZ
               );
               c.mesh.position.lerpVectors(pStarts[k], dst, t);
-              c.mesh.position.y += Math.sin(t * Math.PI) * 0.36;
+              c.mesh.position.y += Math.sin(t * Math.PI) * 0.30;
             }
           });
           currentHeight += pile.length;
         }
       }
 
-      // Возврат колоды в начало стола (ближе к стене)
       async function animReturnDeckHome() {
         flattenAllCards();
         const starts = deckOrder.map((id) => ({
@@ -1418,7 +1459,7 @@
         }));
         const qFlat = new THREE.Quaternion();
 
-        await animateDuration(480, (raw) => {
+        await animateDuration(460, (raw) => {
           const t = easeInOutCubic(raw);
           for (let i = 0; i < deckOrder.length; i++) {
             const c = cards[deckOrder[i]];
@@ -1428,7 +1469,7 @@
               DECK_HOME.z + c.jitterZ
             );
             c.mesh.position.lerpVectors(starts[i].pos, dst, t);
-            c.mesh.position.y += Math.sin(t * Math.PI) * 0.22;
+            c.mesh.position.y += Math.sin(t * Math.PI) * 0.20;
             const targetQ = qFlat.clone().setFromEuler(new THREE.Euler(0, c.jitterYRot, 0));
             c.mesh.quaternion.slerpQuaternions(starts[i].quat, targetQ, t);
           }
@@ -1436,7 +1477,7 @@
       }
 
       // =====================================================================
-      // 11. ВЫДАЧА 3 КАРТ НА СТОЛ (КОМПАКТНО В ЭКРАН), ПОДЪЁМ 90°, РАЗВОРОТ ЛИЦОМ
+      // 11. ВЫДАЧА 3 КАРТ, ПОДЪЁМ 90° (БЕЗ ОТРАЖЕНИЯ РУБАШКИ), ПЛАВНЫЙ РАЗВОРОТ
       // =====================================================================
       const SPREAD_SLOTS = [
         new THREE.Vector3(-0.57, TABLE_Y + CARD_THICKNESS * 0.5 + 0.004, 0.54),
@@ -1445,7 +1486,7 @@
       ];
 
       let drawnCards = [];
-      let appState = 'IDLE'; // IDLE | SHUFFLING | DEALING | REVEALING | DONE
+      let appState = 'IDLE';
 
       const hintPillEl = document.getElementById('hint-pill');
       const resetBtnEl = document.getElementById('reset-btn');
@@ -1460,7 +1501,6 @@
 
         animateDuration(380, (t) => { magicEffectsIntensity = 1.0 - 0.72 * t; });
 
-        // Каждый раз выбираем случайную комбинацию из 3 техник из 6 доступных
         const allShuffles = [
           shuffleVertical90Drop,
           shuffleSmoothSpring,
@@ -1475,10 +1515,8 @@
           await fn();
         }
 
-        // Возвращаем колоду на своё место в начало стола (ближе к стене)
         await animReturnDeckHome();
 
-        // Берём 3 реальные верхние карты из перетасованной колоды
         appState = 'DEALING';
         drawnCards = [
           cards[deckOrder.pop()],
@@ -1486,10 +1524,9 @@
           cards[deckOrder.pop()]
         ];
 
-        // Гарантируем, что текстуры этих 3 карт 100% загружены к моменту раскрытия
         const faceLoadPromise = Promise.all(drawnCards.map((c) => loadCardTextureIntoMaterial(c)));
 
-        // Выкладываем по одной на стол ближе к камере (рубашкой вверх, компактно в экран)
+        // Выкладываем 3 карты на стол рубашкой вверх
         for (let i = 0; i < 3; i++) {
           const c = drawnCards[i];
           const startPos = c.mesh.position.clone();
@@ -1501,18 +1538,16 @@
           await animateDuration(380, (raw) => {
             const t = easeOutCubic(raw);
             c.mesh.position.lerpVectors(startPos, endPos, t);
-            c.mesh.position.y += Math.sin(t * Math.PI) * 0.34;
+            c.mesh.position.y += Math.sin(t * Math.PI) * 0.32;
             c.mesh.quaternion.slerpQuaternions(startQuat, endQuat, t);
           });
           await waitMs(80);
         }
 
         await faceLoadPromise;
-        await waitMs(320);
+        await waitMs(300);
 
-        // ===================================================================
-        // ПОДЪЁМ РОВНО НА 90° ПЕРЕД КАМЕРОЙ И РАЗВОРОТ ЛИЦОМ К ПОЛЬЗОВАТЕЛЮ
-        // ===================================================================
+        // ПОДЪЁМ НА 90° ПЕРЕД КАМЕРОЙ И ПЛАВНЫЙ РАЗВОРОТ ЛИЦОМ К ПОЛЬЗОВАТЕЛЮ
         appState = 'REVEALING';
         haptic('success');
 
@@ -1521,9 +1556,7 @@
         const camRight = new THREE.Vector3().crossVectors(camForward, camera.up).normalize();
         const camUp = new THREE.Vector3().crossVectors(camRight, camForward).normalize();
 
-        // Авторасчёт дистанции, чтобы 3 карты со своим оригинальным размером
-        // идеально помещались в 86% ширины экрана и НЕ вылезали за края
-        const spacing = CARD_W + 0.085; // Аккуратный зазор 0.085
+        const spacing = CARD_W + 0.085;
         const totalSpanW = 2 * spacing + CARD_W;
         const vFovRad = THREE.MathUtils.degToRad(camera.fov);
         const autoDist = totalSpanW / (0.86 * 2 * Math.tan(vFovRad / 2) * camera.aspect);
@@ -1533,23 +1566,25 @@
           .addScaledVector(camForward, distFromCam)
           .addScaledVector(camUp, -0.02);
 
-        // МАТЕМАТИЧЕСКИ ТОЧНЫЕ ПРАВОСТОРОННИЕ МАТРИЦЫ (det = +1):
-        // Face 3 (-Y) = лицевая сторона; её локальный +X = право картинки, +Z = верх картинки.
-        // Лицом к камере: +X -> +camRight, +Y -> +camForward (значит -Y смотрит НА КАМЕРУ), +Z -> +camUp.
-        const faceMatrix = new THREE.Matrix4().makeBasis(
-          camRight.clone(),
-          camForward.clone(),
-          camUp.clone()
-        );
-        const revealFaceQuat = new THREE.Quaternion().setFromRotationMatrix(faceMatrix);
-
-        // Рубашкой к камере (до переворота на 180° вокруг camUp):
+        // РУБАШКОЙ (+Y) К КАМЕРЕ (ТОЧНО БЕЗ ОТРАЖЕНИЯ И ПЕРЕВОРОТА):
+        // +X -> +camRight (право рубашки справа)
+        // +Y -> -camForward (рубашка смотрит на камеру)
+        // +Z -> -camUp (-Z = верх рубашки смотрит ВВЕРХ)
         const backMatrix = new THREE.Matrix4().makeBasis(
-          camRight.clone().negate(),
+          camRight.clone(),
           camForward.clone().negate(),
-          camUp.clone()
+          camUp.clone().negate()
         );
         const revealBackQuat = new THREE.Quaternion().setFromRotationMatrix(backMatrix);
+
+        // ЛИЦОМ (-Y) К КАМЕРЕ (поворот на 180° вокруг camUp):
+        // +X -> -camRight, +Y -> +camForward (-Y на камеру), +Z -> -camUp (-Z = верх лица ВВЕРХ)
+        const faceMatrix = new THREE.Matrix4().makeBasis(
+          camRight.clone().negate(),
+          camForward.clone(),
+          camUp.clone().negate()
+        );
+        const revealFaceQuat = new THREE.Quaternion().setFromRotationMatrix(faceMatrix);
 
         const dealStarts = drawnCards.map((c) => ({
           pos: c.mesh.position.clone(),
@@ -1559,10 +1594,12 @@
           revealCenter.clone().addScaledVector(camRight, (i - 1) * spacing)
         );
 
-        // 1. Поднимаем карты ровно 90° перед камерой (обратной стороной к нам)
-        await animateDuration(480, (raw) => {
+        // 1. Поднимаем карты на 90° перед камерой (рубашкой к нам, в нормальной ориентации)
+        await animateDuration(500, (raw) => {
           const t = easeOutCubic(raw);
-          revealSpot.intensity = 1.25 * t;
+          // Мягкое рассеянное усиление света без бликов
+          ambientLight.intensity = baseAmbientIntensity + 0.35 * t;
+          revealFillLight.intensity = 0.42 * t;
           for (let i = 0; i < 3; i++) {
             const c = drawnCards[i];
             c.mesh.position.lerpVectors(dealStarts[i].pos, revealTargets[i], t);
@@ -1570,8 +1607,8 @@
           }
         });
 
-        // 2. Плавный 3D-разворот на 180° лицом к нам (виден объёмный торец карты!)
-        await animateDuration(680, (raw) => {
+        // 2. Плавный 3D-разворот на 180° лицом к камере
+        await animateDuration(760, (raw) => {
           for (let i = 0; i < 3; i++) {
             const c = drawnCards[i];
             const localT = THREE.MathUtils.clamp((raw - i * 0.08) / 0.84, 0, 1);
@@ -1579,34 +1616,33 @@
             const spin = new THREE.Quaternion().setFromAxisAngle(camUp, Math.PI * eased);
             c.mesh.quaternion.copy(spin).multiply(revealBackQuat);
             c.mesh.position.copy(revealTargets[i]);
-            c.mesh.position.addScaledVector(camForward, -Math.sin(eased * Math.PI) * 0.12);
+            c.mesh.position.addScaledVector(camForward, -Math.sin(eased * Math.PI) * 0.11);
           }
         });
 
-        // Фиксируем строго ровно лицом к камере
         for (let i = 0; i < 3; i++) {
           drawnCards[i].mesh.quaternion.copy(revealFaceQuat);
           drawnCards[i].mesh.position.copy(revealTargets[i]);
         }
 
-        // Держим ровно 3 секунды, чтобы пользователь рассмотрел все 3 карты
+        // Показываем ровно 3 секунды
         await waitMs(3000);
 
-        // 3. Аккуратно опускаем карты обратно на стол ЛИЦОМ ВВЕРХ (правильно ориентированными!)
+        // 3. Аккуратно опускаем карты на стол ЛИЦОМ ВВЕРХ (поворот по Z на Math.PI кладёт -Y вверх, -Z к стене!)
         const downStarts = drawnCards.map((c) => ({
           pos: c.mesh.position.clone(),
           quat: c.mesh.quaternion.clone()
         }));
 
-        await animateDuration(640, (raw) => {
+        await animateDuration(660, (raw) => {
           const t = easeInOutCubic(raw);
-          revealSpot.intensity = 1.25 * (1 - t);
+          ambientLight.intensity = baseAmbientIntensity + 0.35 * (1 - t);
+          revealFillLight.intensity = 0.42 * (1 - t);
           for (let i = 0; i < 3; i++) {
             const c = drawnCards[i];
             const dstPos = SPREAD_SLOTS[i].clone();
-            // Поворот по X на Math.PI кладёт карту -Y вверх, +X вправо, +Z к стене (НЕ вверх ногами!)
             const dstQuat = new THREE.Quaternion().setFromEuler(
-              new THREE.Euler(Math.PI, (i - 1) * -0.025, 0)
+              new THREE.Euler(0, (i - 1) * -0.025, Math.PI)
             );
             c.mesh.position.lerpVectors(downStarts[i].pos, dstPos, t);
             c.mesh.position.y += Math.sin(t * Math.PI) * 0.22;
@@ -1619,7 +1655,6 @@
         appState = 'DONE';
         resetBtnEl.classList.add('visible');
 
-        // Сохраняем результат расклада для последующей отправки в Python-бота
         window.LAST_TAROT_READING = drawnCards.map((c, idx) => ({
           position: idx + 1,
           card: c.name
@@ -1633,7 +1668,6 @@
 
         resetBtnEl.classList.remove('visible');
 
-        // Возвращаем 3 открытые карты обратно в колоду
         deckOrder.push(...drawnCards.map((c) => c.id));
         drawnCards = [];
 
@@ -1690,11 +1724,11 @@
         const dt = Math.min(clock.getDelta(), 0.05);
         const elapsed = clock.getElapsedTime();
 
-        leftCandleLight.intensity = 4.0 + Math.sin(elapsed * 6.4) * 0.26 + Math.sin(elapsed * 14.3) * 0.12;
-        rightCandleLight.intensity = 3.3 + Math.cos(elapsed * 5.7) * 0.22 + Math.sin(elapsed * 12.1) * 0.11;
+        leftCandleLight.intensity = 3.7 + Math.sin(elapsed * 6.4) * 0.24 + Math.sin(elapsed * 14.3) * 0.10;
+        rightCandleLight.intensity = 3.1 + Math.cos(elapsed * 5.7) * 0.20 + Math.sin(elapsed * 12.1) * 0.09;
 
         if (appState === 'IDLE') {
-          deckGroup.position.y = Math.sin(elapsed * 1.9) * 0.006;
+          deckGroup.position.y = Math.sin(elapsed * 1.9) * 0.005;
         } else {
           deckGroup.position.y = THREE.MathUtils.lerp(deckGroup.position.y, 0, 0.15);
         }
